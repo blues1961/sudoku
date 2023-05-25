@@ -13,18 +13,25 @@ class SudokuGame:
 
         self.BLACK = (0, 0, 0)
         self.WHITE = (255, 255, 255)
+
         self.font = pygame.font.Font(None, 46)
         self.font_candidate = pygame.font.Font(None,25)
+        self.font_menu = pygame.font.Font(None,25)
         self.cell_size = 90
         self.cell_margin = 0
-        self.board_margin = 20
+        self.board_margin = 40
+
+        self.menu_open = False  # Variable pour indiquer si le menu est ouvert
+
 
         self.board = grid
         self.solution=solution
 
         self.selected_cell = None
         self.game_started = False
+
         self.create_widgets()
+        self.create_menu()
 
         self.initial_color=pygame.Color(random.randint(190,220),random.randint(190,220),random.randint(190,220))
         self.completed_color=pygame.Color(random.randint(220,250),random.randint(220,250),random.randint(220,250))
@@ -38,7 +45,53 @@ class SudokuGame:
 
         self.sauvegarder_grille_sudoku()
     
-    
+    def create_menu(self):
+        
+        self.menu_button = pygame.Rect(1100, 20, 40, 40)  # Position et taille du bouton de menu
+        self.menu_options = [
+            {'text': 'Nouvelle partie', 'action': self.start_new_game},
+            {'text': 'Réinitialiser grille', 'action': self.reinitialize_grid},
+            {'text': 'Quitter', 'action': quit}
+        ]  # Options de menu avec leur texte et action associée
+        self.menu_option_rects = []  # Liste de rectangles pour les options de menu
+
+
+    def draw_menu_button(self):
+
+        pygame.draw.rect(self.screen, pygame.Color('white'), self.menu_button)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 30), (1135, 30), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 35), (1135, 35), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 40), (1135, 40), 4)
+
+    def create_menu_options(self):
+        self.menu_option_rects = []  # Réinitialiser la liste des rectangles des options de menu
+
+        menu_top = self.board_margin + 60
+        menu_left = self.screen.get_width() - self.board_margin - 200 
+        for index, option in enumerate(self.menu_options):
+            option_rect = pygame.Rect(menu_left,menu_top + index * 60,200,50)
+            self.menu_option_rects.append(option_rect)
+
+    def draw_menu_options(self):
+        for index, option_rect in enumerate(self.menu_option_rects):
+            pygame.draw.rect(self.screen, pygame.Color('white'), option_rect)
+            pygame.draw.rect(self.screen, pygame.Color('black'), option_rect, 2)
+            text = self.font_menu.render(self.menu_options[index]['text'], True, pygame.Color('black'))
+            text_rect = text.get_rect(center=option_rect.center)
+            self.screen.blit(text, text_rect)
+
+    def handle_menu_click(self, pos):
+        if self.menu_button.collidepoint(pos):
+            self.menu_open = not self.menu_open
+            if self.menu_open:
+                self.create_menu_options()
+
+        if self.menu_open:
+            for index, option_rect in enumerate(self.menu_option_rects):
+                if option_rect.collidepoint(pos):
+                    self.menu_options[index]['action']()  # Exécuter l'action associée à l'option de menu
+
+
     def sauvegarder_grille_sudoku(self):
         # Convertir la grille en une chaîne de caractères
         chaine_grille = ''.join(str(chiffre) for ligne in self.board for chiffre in ligne)
@@ -53,11 +106,16 @@ class SudokuGame:
     def load_saved_game(self):
         self.game_started=True
         
+    def reinitialize_grid(self):
+        for cell in self.cells:
+            if cell['editable']:
+                cell['value']=0
+                cell['candidate']=""
 
     def create_widgets(self):
         
         self.cells = [{'rect': pygame.Rect(self.board_margin + j * (self.cell_size + self.cell_margin),
-                                   self.board_margin + i * (self.cell_size + self.cell_margin),
+                                   self.board_margin+i * (self.cell_size + self.cell_margin),
                                    self.cell_size, self.cell_size),
                'value': self.board[i][j],
                'row': i,
@@ -106,7 +164,7 @@ class SudokuGame:
             else:
                  pygame.draw.rect(self.screen, pygame.Color(editable_color), cell['rect']) 
             
-            pygame.draw.rect(self.screen, pygame.Color('black'), cell['rect'],1)
+            pygame.draw.rect(self.screen, pygame.Color('lightblue'), cell['rect'],1)
      
             if cell['value'] != 0:
                 text = self.font.render(str(cell['value']), True, pygame.Color(text_color))
@@ -146,7 +204,11 @@ class SudokuGame:
                     self.screen.blit(text, text_rect)
                     
                            
- 
+        self.draw_menu_button()  # Dessiner le bouton de menu
+
+        if self.menu_open:
+            self.draw_menu_options()  # Dessiner les options de menu
+
     
         pygame.display.flip()
 
@@ -182,14 +244,13 @@ class SudokuGame:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
-
-            elif event.type==pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
+                self.handle_menu_click(pos)  # Gérer le clic sur le bouton de menu ou sur une option de menu
                 for cell in self.cells:
                     if cell['rect'].collidepoint(pos):
                         self.select_cell(cell)
                         break
-
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button==3:
                     self.candidate_mode = not self.candidate_mode
@@ -224,6 +285,7 @@ class SudokuGame:
             
 
 if __name__ == '__main__':
+
     grid,solution =  generate_sudoku() 
     game = SudokuGame(grid,solution)
     game.run()
