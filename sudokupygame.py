@@ -53,6 +53,7 @@ class SudokuGame:
         self.menu_options = [
             {'text': 'Nouvelle partie', 'action': self.start_new_game},
             {'text': 'Réinitialiser grille', 'action': self.reinitialize_grid},
+            {'text': 'Résoudre grille','action':self.solve_grid},
             {'text': 'Quitter', 'action': quit}
         ]  # Options de menu avec leur texte et action associée
         self.menu_option_rects = []  # Liste de rectangles pour les options de menu
@@ -233,7 +234,9 @@ class SudokuGame:
             self.draw_board()
     
     def start_new_game(self):
-        pass
+        grid,solution = generate_sudoku()
+        self.__init__(grid,solution)
+
 
     def reinitialize_grid(self):
         for cell in self.cells:
@@ -242,8 +245,14 @@ class SudokuGame:
                 cell['candidate']=""
 
    
-   
-                           
+    def solve_grid(self):
+        current_grid = [[0 for _ in range(9)] for _ in range(9)]
+        for cell in self.cells:
+            current_grid[cell["row"]][cell["col"]] = cell['value']
+        self.board=solve(current_grid)
+        self.create_widgets()
+        
+
     
     
     
