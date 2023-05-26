@@ -56,14 +56,7 @@ class SudokuGame:
             {'text': 'Quitter', 'action': quit}
         ]  # Options de menu avec leur texte et action associée
         self.menu_option_rects = []  # Liste de rectangles pour les options de menu
-
-    def draw_menu_button(self):
-
-        pygame.draw.rect(self.screen, pygame.Color('white'), self.menu_button)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 30), (1135, 30), 4)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 35), (1135, 35), 4)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 40), (1135, 40), 4)
-
+    
     def create_menu_options(self):
         self.menu_option_rects = []  # Réinitialiser la liste des rectangles des options de menu
         menu_top = self.board_margin + 60
@@ -71,6 +64,13 @@ class SudokuGame:
         for index, option in enumerate(self.menu_options):
             option_rect = pygame.Rect(menu_left,menu_top + index * 60,200,50)
             self.menu_option_rects.append(option_rect)
+    
+    def draw_menu_button(self):
+
+        pygame.draw.rect(self.screen, pygame.Color('white'), self.menu_button)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 30), (1135, 30), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 35), (1135, 35), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 40), (1135, 40), 4)
 
     def draw_menu_options(self):
         for index, option_rect in enumerate(self.menu_option_rects):
@@ -84,7 +84,6 @@ class SudokuGame:
             text_rect = text.get_rect(center=option_rect.center)
             self.screen.blit(text, text_rect)
             
-  
     def handle_menu_click(self, pos):
    
         if self.menu_button.collidepoint(pos):
@@ -115,17 +114,7 @@ class SudokuGame:
 
         pygame.display.flip()
     
-    def start_new_game(self):
-        pass
-
-    def reinitialize_grid(self):
-        for cell in self.cells:
-            if cell['editable']:
-                cell['value']=0
-                cell['candidate']=""
-
     def create_widgets(self):
-        
         self.cells = [{'rect': pygame.Rect(self.board_margin + j * (self.cell_size + self.cell_margin),
                                    self.board_margin+i * (self.cell_size + self.cell_margin),
                                    self.cell_size, self.cell_size),
@@ -214,7 +203,7 @@ class SudokuGame:
                     text = self.font_candidate.render(self.selected_cell['candidate'], True, pygame.Color('black'))
                     text_rect = text.get_rect(center=self.textbox_rect.center)
                     self.screen.blit(text, text_rect)
-                           
+    
     def select_cell(self, cell):
         self.selected_cell = cell
         self.selected_rect.topleft = cell['rect'].topleft
@@ -242,6 +231,22 @@ class SudokuGame:
                     return
             self.selected_cell['candidate']=self.input_text                   
             self.draw_board()
+    
+    def start_new_game(self):
+        pass
+
+    def reinitialize_grid(self):
+        for cell in self.cells:
+            if cell['editable']:
+                cell['value']=0
+                cell['candidate']=""
+
+   
+   
+                           
+    
+    
+    
                 
     def handle_events(self):
         for event in pygame.event.get():
