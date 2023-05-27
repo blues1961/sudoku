@@ -1,10 +1,14 @@
 # sudoku
 
 This is a Sudoku game implemented using the Pygame library. It allows the user to play Sudoku by clicking on the cells and inputting numbers. 
-right click to select the cell to enter a list of candidate.
-left click to select a cell to enter a value.
+
+Right click: select the cell to enter a list of candidate.
+Left click: select the cell to enter a value.
 
 Backspace or delete to remove a value or a candidate.
+
+To open/close the menu click on the hamburger button on the top right side of the window.
+
 
 Here is a breakdown of the code:
 
