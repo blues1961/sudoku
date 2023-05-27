@@ -19,7 +19,7 @@ Left click: select the cell; the border turn blue; enter a value.
 
 Right click: select the cell; the border turn red; enter a list of candidate.
 
-![Screenshot](screenshot/right_click_value.png)
+![Screenshot](screenshot/right_click_candidate.png)
 
 Open/close menu: click on the hambergur button on the top right corner.
 
