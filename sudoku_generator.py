@@ -100,5 +100,6 @@ def generate_sudoku():
 
 def main():
     grid,solution = generate_sudoku()
+    
 if __name__ == '__main__':
     main()
