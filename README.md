@@ -2,13 +2,28 @@
 
 This is a Sudoku game implemented using the Pygame library. It allows the user to play Sudoku by clicking on the cells and inputting numbers. 
 
-Right click: select the cell to enter a list of candidate.
-Left click: select the cell to enter a value.
 
-Backspace or delete to remove a value or a candidate.
+
+To enter a value: select the cell with a left click.
+To enter a list of candidate: select the cell with a right click.
+
+After selecting a cell, use Backspace or delete to remove a value or a candidate.
 
 To open/close the menu click on the hamburger button on the top right side of the window.
 
+example:
+
+Left click: select the cell; the border turn blue; enter a value.
+
+![Screenshot](screenshot/left_click_value.png)
+
+Right click: select the cell; the border turn red; enter a list of candidate.
+
+![Screenshot](screenshot/right_click_value.png)
+
+Open/close menu: click on the hambergur button on the top right corner.
+
+![Screenshot](screenshot/ouverture_menu.png)
 
 Here is a breakdown of the code:
 
