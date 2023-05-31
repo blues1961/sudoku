@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from sudoku_generator import *
 
 class SudokuGame:
@@ -19,6 +20,7 @@ class SudokuGame:
         self.font = pygame.font.Font(None, 46)
         self.font_candidate = pygame.font.Font(None,25)
         self.font_menu = pygame.font.Font(None,25)
+
         self.cell_size = 90
         self.cell_margin = 0
         self.grid_margin = 40
@@ -43,6 +45,12 @@ class SudokuGame:
         self.textbox_rect=None
         self.input_text = ""                    
         self.candidate_mode = False
+
+        self.start_time=None
+        self.paused_time = 0
+        self.duration_heures=0
+        self.duration_minutes=0
+        self.duration_secondes=0 
     
     def create_menu(self):
         
@@ -63,11 +71,21 @@ class SudokuGame:
             option_rect = pygame.Rect(menu_left,menu_top + index * 60,200,50)
             self.menu_option_rects.append(option_rect)
     
+    def draw_timer(self):
+        timer_top = self.grid_margin 
+        timer_left = self.screen.get_width() - self.grid_margin - 200 
+        timer_rect = pygame.Rect(timer_left,timer_top,100,40)
+        pygame.draw.rect(self.screen,self.completed_color,timer_rect)
+        str_time= str(self.duration_heures)+":"+str(self.duration_minutes+100)[-2:]+":"+str(self.duration_secondes+100)[-2:]
+        text = self.font_menu.render(str_time,True,pygame.Color('black'))
+        text_rect = text.get_rect(center=timer_rect.center)
+        self.screen.blit(text, text_rect)
+
     def draw_menu_button(self):
         pygame.draw.rect(self.screen, pygame.Color('white'), self.menu_button)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 30), (1135, 30), 4)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 35), (1135, 35), 4)
         pygame.draw.line(self.screen, pygame.Color('black'), (1105, 40), (1135, 40), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 45), (1135, 45), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 50), (1135, 50), 4)
 
     def draw_menu_options(self):
         for index, option_rect in enumerate(self.menu_option_rects):
@@ -102,6 +120,7 @@ class SudokuGame:
     def draw_window(self):
         self.draw_grid()  # Dessiner la grille
         self.draw_menu_button()  #dessiner bouton hamburger du menu
+        self.draw_timer() #dessiner le timer
         if self.menu_open:
             pos = pygame.mouse.get_pos()
             for index, option_rect in enumerate(self.menu_option_rects):
@@ -209,6 +228,7 @@ class SudokuGame:
         top =  self.grid_margin + self.selected_cell['row'] * (self.cell_size + self.cell_margin)
         self.textbox_rect = pygame.Rect(left,top,self.cell_size, self.cell_size)
         while True:
+            self.calculate_duration()
             self.input_text= self.selected_cell['candidate']
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -231,8 +251,15 @@ class SudokuGame:
         grid,solution = generate_sudoku()
         self.grid = grid
         self.solution = solution
-        self.create_widgets()
 
+        self.create_widgets()
+        self.duration=0
+        self.start_time=None
+        self.start_time = time.time()
+        self.calculate_duration()
+
+        
+    
 
     def reinitialize_grid(self):
         for cell in self.cells:
@@ -262,8 +289,6 @@ class SudokuGame:
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button==3:
                     self.candidate_mode = not self.candidate_mode
-                    print("self.camdidate_mode",self.candidate_mode)
-                    print("self.selected_cell",self.selected_cell)
                     if self.candidate_mode and self.selected_cell:
                         if self.selected_cell['editable']:
                             self.update_candidate()
@@ -291,8 +316,20 @@ class SudokuGame:
                 return False
         return True
 
+    def calculate_duration(self):
+        if not self.grid_completed():
+            elapsed_time = time.time() - self.start_time - self.paused_time
+            # Conversion du temps en heure minutes et secondes
+            self.duration_heures = int(elapsed_time//3600)
+            self.duration_minutes = int(int(elapsed_time % 3600)//60)
+            self.duration_secondes=int(int(int(elapsed_time % 3600)%60))
+        
+
+
     def play_game(self):
+        self.start_time=time.time()
         while True:
+            self.calculate_duration()
             self.handle_events()
             self.draw_window()
            

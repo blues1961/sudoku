@@ -20,7 +20,7 @@ def solve(grid):
 
 def generate_grid():
     grid = [[0 for _ in range(9)] for _ in range(9)]
-    holes = random.randint(65, 75)
+    holes = random.randint(60, 90)
     solve(grid)
     solution = [row.copy() for row in grid]  # create a copy of grid to preserve solution
     while holes > 0:
