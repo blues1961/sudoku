@@ -74,18 +74,28 @@ class SudokuGame:
     def draw_timer(self):
         timer_top = self.grid_margin 
         timer_left = self.screen.get_width() - self.grid_margin - 200 
-        timer_rect = pygame.Rect(timer_left,timer_top,100,40)
+        timer_rect = pygame.Rect(timer_left,timer_top,80,40)
         pygame.draw.rect(self.screen,self.completed_color,timer_rect)
-        str_time= str(self.duration_heures)+":"+str(self.duration_minutes+100)[-2:]+":"+str(self.duration_secondes+100)[-2:]
+        str_time= str(self.duration_minutes+100)[-2:]+":"+str(self.duration_secondes+100)[-2:]
         text = self.font_menu.render(str_time,True,pygame.Color('black'))
         text_rect = text.get_rect(center=timer_rect.center)
         self.screen.blit(text, text_rect)
 
+    
+    def draw_pause_button(self):
+        pause_top = self.grid_margin 
+        pause_left = self.screen.get_width() - self.grid_margin - 120 
+        pause_rect = pygame.Rect(pause_left,pause_top,50,40)
+        pygame.draw.rect(self.screen,self.initial_color,pause_rect)
+        pygame.draw.line(self.screen, pygame.Color('black'), (pause_left+20, pause_top+8), (pause_left+20, pause_top+28), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (pause_left+30, pause_top+8), (pause_left+30, pause_top+28), 4)
+        
+
     def draw_menu_button(self):
         pygame.draw.rect(self.screen, pygame.Color('white'), self.menu_button)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 40), (1135, 40), 4)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 45), (1135, 45), 4)
-        pygame.draw.line(self.screen, pygame.Color('black'), (1105, 50), (1135, 50), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1115, 40), (1140, 40), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1115, 45), (1140, 45), 4)
+        pygame.draw.line(self.screen, pygame.Color('black'), (1115, 50), (1140, 50), 4)
 
     def draw_menu_options(self):
         for index, option_rect in enumerate(self.menu_option_rects):
@@ -121,6 +131,7 @@ class SudokuGame:
         self.draw_grid()  # Dessiner la grille
         self.draw_menu_button()  #dessiner bouton hamburger du menu
         self.draw_timer() #dessiner le timer
+        self.draw_pause_button()
         if self.menu_open:
             pos = pygame.mouse.get_pos()
             for index, option_rect in enumerate(self.menu_option_rects):
