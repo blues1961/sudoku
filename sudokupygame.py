@@ -38,22 +38,23 @@ class SudokuGame:
         self.menu_option_rects = []  # Rectangles des options de menu
         self.create_widgets()
         self.create_menu()
-
+        
         self.initial_color=pygame.Color(random.randint(190,220),random.randint(190,220),random.randint(190,220))
         self.completed_color=pygame.Color(random.randint(220,250),random.randint(220,250),random.randint(220,250))
 
         self.textbox_rect=None
         self.input_text = ""                    
         self.candidate_mode = False
-
-        self.start_time=None
+     
+        self.pause_button_hovered=False
+        self.start_time=time.time()
         self.paused_time = 0
         self.duration_heures=0
         self.duration_minutes=0
         self.duration_secondes=0 
+        
     
     def create_menu(self):
-        
         self.menu_button = pygame.Rect(1100, 20, 40, 40)  # Position et taille du bouton de menu
         self.menu_options = [
             {'text': 'Nouvelle partie', 'action': self.start_new_game},
@@ -72,9 +73,11 @@ class SudokuGame:
             self.menu_option_rects.append(option_rect)
     
     def draw_timer(self):
+
         timer_top = self.grid_margin 
         timer_left = self.screen.get_width() - self.grid_margin - 200 
         timer_rect = pygame.Rect(timer_left,timer_top,80,40)
+        
         pygame.draw.rect(self.screen,self.completed_color,timer_rect)
         str_time= str(self.duration_minutes+100)[-2:]+":"+str(self.duration_secondes+100)[-2:]
         text = self.font_menu.render(str_time,True,pygame.Color('black'))
@@ -83,14 +86,22 @@ class SudokuGame:
 
     
     def draw_pause_button(self):
-        pause_top = self.grid_margin 
-        pause_left = self.screen.get_width() - self.grid_margin - 120 
-        pause_rect = pygame.Rect(pause_left,pause_top,50,40)
-        pygame.draw.rect(self.screen,self.initial_color,pause_rect)
-        pygame.draw.line(self.screen, pygame.Color('black'), (pause_left+20, pause_top+8), (pause_left+20, pause_top+28), 4)
-        pygame.draw.line(self.screen, pygame.Color('black'), (pause_left+30, pause_top+8), (pause_left+30, pause_top+28), 4)
         
+        if self.pause_button['hovered']:
+            color = self.initial_color
+        else:
+            color = self.completed_color
+    
+        pygame.draw.rect(self.screen,color,self.pause_button['rect'])
+        pygame.draw.rect(self.screen,self.completed_color,self.pause_button['rect'],4)
+        if self.pause_button['on_pause']:
+            pygame.draw.polygon(self.screen, pygame.Color('black'), [(self.pause_button['left'] + 15, self.pause_button['top'] + 10), (self.pause_button['left'] + 15, self.pause_button['top'] + 30), (self.pause_button['left'] + 30, self.pause_button['top']  + 20)])
+        else:
 
+            pygame.draw.line(self.screen, pygame.Color('black'), (self.pause_button['left']+16,self.pause_button['top']+12), (self.pause_button['left']+16, self.pause_button['top']+28), 5)
+            pygame.draw.line(self.screen, pygame.Color('black'), (self.pause_button['left']+24,self.pause_button['top']+12), (self.pause_button['left']+24, self.pause_button['top']+28), 5)
+            
+    
     def draw_menu_button(self):
         pygame.draw.rect(self.screen, pygame.Color('white'), self.menu_button)
         pygame.draw.line(self.screen, pygame.Color('black'), (1115, 40), (1140, 40), 4)
@@ -126,21 +137,39 @@ class SudokuGame:
         
         else:
              self.hovered_option = None
+    
+    def handle_pause_button(self,pos):
+        if self.pause_button['rect'].collidepoint(pos):
+            self.pause_button['hovered'] = True
+            self.pause_button['on_pause'] = not self.pause_button['on_pause']
+            if self.pause_button['on_pause']:
+                self.pause_button['start_time'] = time.time()
+            else:
+                self.paused_time = self.paused_time + self.pause_button['duration']
+                self.pause_button['duration']=0
+        else:
+            self.pause_button['hovered'] = False
+        self.draw_pause_button()
 
     def draw_window(self):
-        self.draw_grid()  # Dessiner la grille
+        if self.pause_button['on_pause']:
+            pass
+        else:
+            self.draw_grid()  # Dessiner la grille
         self.draw_menu_button()  #dessiner bouton hamburger du menu
         self.draw_timer() #dessiner le timer
-        self.draw_pause_button()
+        self.draw_pause_button() #dessiner le bouton pause
         if self.menu_open:
             pos = pygame.mouse.get_pos()
             for index, option_rect in enumerate(self.menu_option_rects):
                 if option_rect.collidepoint(pos):
                     self.hovered_option = index  # Mettre à jour l'option survolée
             self.draw_menu_options()  # Dessiner les options de menu
+        
         pygame.display.flip()
     
     def create_widgets(self):
+        # create grid cells
         self.cells = [{'rect': pygame.Rect(self.grid_margin + j * (self.cell_size + self.cell_margin),
                                    self.grid_margin+i * (self.cell_size + self.cell_margin),
                                    self.cell_size, self.cell_size),
@@ -150,11 +179,14 @@ class SudokuGame:
                'editable': self.grid[i][j] == 0,
                'candidate': ""}
               for i in range(9) for j in range(9)]
-
-        
         self.selected_rect = pygame.Rect(0, 0, self.cell_size, self.cell_size)
         self.selected_rect_color = pygame.Color('blue')
-    
+
+        # create pause button
+        pause_top = self.grid_margin 
+        pause_left = self.screen.get_width() - self.grid_margin - 120 
+        self.pause_button = {'rect':pygame.Rect(pause_left,pause_top,40,40),'hovered':False,'top':pause_top,'left':pause_left,'on_pause':False,'start_time':None,'duration':0}
+
     def draw_grid(self):
         
         # Create a new display surface with the desired width and height
@@ -217,9 +249,7 @@ class SudokuGame:
             if (cell['col']) == 8:
                 pygame.draw.line(self.screen, pygame.Color('black'), cell['rect'].topright, cell['rect'].bottomright, thickness)
 
-            
-           
-          
+         
             if self.selected_cell:
                 pygame.draw.rect(self.screen, self.selected_rect_color, self.selected_rect, thickness)
             
@@ -259,15 +289,9 @@ class SudokuGame:
             self.draw_window()
     
     def start_new_game(self):
-        grid,solution = generate_sudoku()
-        self.grid = grid
-        self.solution = solution
+        game = SudokuGame(grid,solution)
+        game.run()
 
-        self.create_widgets()
-        self.duration=0
-        self.start_time=None
-        self.start_time = time.time()
-        self.calculate_duration()
 
         
     
@@ -283,21 +307,25 @@ class SudokuGame:
         current_grid = [[0 for _ in range(9)] for _ in range(9)]
         for cell in self.cells:
             current_grid[cell["row"]][cell["col"]] = cell['value']
-        self.grid=solve(current_grid)
+        self.grid=solve(self.grid)
         self.create_widgets()
                    
     def handle_events(self):
+       
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
+                self.handle_pause_button(pos)
+                if self.pause_button['on_pause']:
+                    break
                 self.handle_menu_click(pos)  # Gérer le clic sur le bouton de menu ou sur une option de menu
                 for cell in self.cells:
                     if cell['rect'].collidepoint(pos):
                         self.select_cell(cell)
                         break
-            elif event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pygame.MOUSEBUTTONUP and not self.pause_button['on_pause']:
                 if event.button==3:
                     self.candidate_mode = not self.candidate_mode
                     if self.candidate_mode and self.selected_cell:
@@ -305,7 +333,7 @@ class SudokuGame:
                             self.update_candidate()
                     self.candidate_mode=False
                     self.selected_cell=None
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN and not self.pause_button['on_pause']:
                 if self.selected_cell and self.selected_cell['editable']:
                     if event.unicode.isdigit():
                             self.selected_cell['value'] = int(event.unicode)
@@ -320,6 +348,11 @@ class SudokuGame:
                             self.hovered_option = index  # Mettre à jour l'option survolée
                         else:
                             self.hovered_option = None  # Réinitialiser l'option survolée
+                
+                if self.pause_button['rect'].collidepoint(event.pos):
+                    self.pause_button['hovered']=True
+                else:
+                    self.pause_button['hovered']=False
 
     def grid_completed(self):
         for cell in self.cells:
@@ -329,20 +362,23 @@ class SudokuGame:
 
     def calculate_duration(self):
         if not self.grid_completed():
-            elapsed_time = time.time() - self.start_time - self.paused_time
-            # Conversion du temps en heure minutes et secondes
-            self.duration_heures = int(elapsed_time//3600)
-            self.duration_minutes = int(int(elapsed_time % 3600)//60)
-            self.duration_secondes=int(int(int(elapsed_time % 3600)%60))
+            if self.pause_button['on_pause']:
+                self.pause_button['duration'] = time.time()- self.pause_button['start_time']
+            else:
+                elapsed_time = time.time() - self.start_time - self.paused_time
+                # Conversion du temps en heure minutes et secondes
+                self.duration_heures = int(elapsed_time//3600)
+                self.duration_minutes = int(int(elapsed_time % 3600)//60)
+                self.duration_secondes=int(int(int(elapsed_time % 3600)%60))
         
 
 
     def play_game(self):
-        self.start_time=time.time()
         while True:
             self.calculate_duration()
             self.handle_events()
             self.draw_window()
+    
            
     def run(self):
         self.play_game()    
