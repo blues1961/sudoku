@@ -289,12 +289,9 @@ class SudokuGame:
             self.draw_window()
     
     def start_new_game(self):
+        grid,solution =  generate_sudoku() 
         game = SudokuGame(grid,solution)
         game.run()
-
-
-        
-    
 
     def reinitialize_grid(self):
         for cell in self.cells:
