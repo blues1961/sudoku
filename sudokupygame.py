@@ -97,7 +97,6 @@ class SudokuGame:
         if self.pause_button['on_pause']:
             pygame.draw.polygon(self.screen, pygame.Color('black'), [(self.pause_button['left'] + 15, self.pause_button['top'] + 10), (self.pause_button['left'] + 15, self.pause_button['top'] + 30), (self.pause_button['left'] + 30, self.pause_button['top']  + 20)])
         else:
-
             pygame.draw.line(self.screen, pygame.Color('black'), (self.pause_button['left']+16,self.pause_button['top']+12), (self.pause_button['left']+16, self.pause_button['top']+28), 5)
             pygame.draw.line(self.screen, pygame.Color('black'), (self.pause_button['left']+24,self.pause_button['top']+12), (self.pause_button['left']+24, self.pause_button['top']+28), 5)
             
@@ -181,6 +180,8 @@ class SudokuGame:
                'editable': self.grid[i][j] == 0,
                'candidate': ""}
               for i in range(9) for j in range(9)]
+        
+        # create the selected cell rectangle
         self.selected_rect = pygame.Rect(0, 0, self.cell_size, self.cell_size)
         self.selected_rect_color = pygame.Color('blue')
 
@@ -190,6 +191,7 @@ class SudokuGame:
         self.pause_button = {'rect':pygame.Rect(pause_left,pause_top,40,40),'hovered':False,'top':pause_top,'left':pause_left,'on_pause':False,'start_time':None,'duration':0}
     
     def draw_pause_window(self):
+        # draw the pause window
         w = 9 * (self.cell_size + self.cell_margin)
         rect = pygame.Rect(self.grid_margin,self.grid_margin,w,w)
         pygame.draw.rect(self.screen,pygame.Color("lightgray"),rect)
@@ -273,10 +275,12 @@ class SudokuGame:
                     self.screen.blit(text, text_rect)
     
     def select_cell(self, cell):
+        # initialize the selected cell
         self.selected_cell = cell
         self.selected_rect.topleft = cell['rect'].topleft
     
     def update_candidate(self):
+        # update the list of candidate based on the input of the user
         left = self.grid_margin + self.selected_cell['col'] * (self.cell_size + self.cell_margin)
         top =  self.grid_margin + self.selected_cell['row'] * (self.cell_size + self.cell_margin)
         self.textbox_rect = pygame.Rect(left,top,self.cell_size, self.cell_size)
@@ -301,23 +305,32 @@ class SudokuGame:
             self.draw_window()
     
     def start_new_game(self):
+        #start a new game
+        self.selected_cell=None
         grid,solution =  generate_sudoku() 
         game = SudokuGame(grid,solution)
         game.run()
 
     def reinitialize_grid(self):
+        # restaore the grid to it's initial state
         for cell in self.cells:
             if cell['editable']:
                 cell['value']=0
                 cell['candidate']=""
-
    
     def solve_grid(self):
+        # resoudre la grille initiale
         current_grid = [[0 for _ in range(9)] for _ in range(9)]
         for cell in self.cells:
-            current_grid[cell["row"]][cell["col"]] = cell['value']
-        self.grid=solve(self.grid)
-        self.create_widgets()
+            if not cell['editable']:
+                current_grid[cell["row"]][cell["col"]] = cell['value']
+        solve(current_grid)
+        for cell in self.cells:
+            cell['value'] = current_grid[cell['row']][cell['col']]        
+        #self.draw_window()
+      
+        
+        
                    
     def handle_events(self):
        
