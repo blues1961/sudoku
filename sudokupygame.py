@@ -153,12 +153,14 @@ class SudokuGame:
 
     def draw_window(self):
         if self.pause_button['on_pause']:
-            pass
+           self.draw_pause_window()
         else:
             self.draw_grid()  # Dessiner la grille
         self.draw_menu_button()  #dessiner bouton hamburger du menu
         self.draw_timer() #dessiner le timer
-        self.draw_pause_button() #dessiner le bouton pause
+        if not self.grid_completed():
+            self.draw_pause_button() #dessiner le bouton pause
+        
         if self.menu_open:
             pos = pygame.mouse.get_pos()
             for index, option_rect in enumerate(self.menu_option_rects):
@@ -186,7 +188,17 @@ class SudokuGame:
         pause_top = self.grid_margin 
         pause_left = self.screen.get_width() - self.grid_margin - 120 
         self.pause_button = {'rect':pygame.Rect(pause_left,pause_top,40,40),'hovered':False,'top':pause_top,'left':pause_left,'on_pause':False,'start_time':None,'duration':0}
-
+    
+    def draw_pause_window(self):
+        w = 9 * (self.cell_size + self.cell_margin)
+        rect = pygame.Rect(self.grid_margin,self.grid_margin,w,w)
+        pygame.draw.rect(self.screen,pygame.Color("lightgray"),rect)
+        
+        text = self.font.render("En pause", True, pygame.Color('darkgray'))
+        text_rect = text.get_rect(center=rect.center)
+        self.screen.blit(text, text_rect)   
+        
+    
     def draw_grid(self):
         
         # Create a new display surface with the desired width and height
