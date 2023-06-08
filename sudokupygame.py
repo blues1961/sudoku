@@ -61,7 +61,7 @@ class SudokuGame:
             {'text': 'Réinitialiser grille', 'action': self.reinitialize_grid},
             {'text': 'Résoudre grille','action':self.solve_grid},
             {'text': 'Quitter', 'action': quit}
-        ]  # Options de menu avec leur texte et action associée
+         ]  # Options de menu avec leur texte et action associée
         self.menu_option_rects = []  # Liste de rectangles pour les options de menu
     
     def create_menu_options(self):
@@ -327,7 +327,7 @@ class SudokuGame:
         solve(current_grid)
         for cell in self.cells:
             cell['value'] = current_grid[cell['row']][cell['col']]        
-        #self.draw_window()
+     
       
         
         
