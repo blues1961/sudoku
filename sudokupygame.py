@@ -317,6 +317,11 @@ class SudokuGame:
             if cell['editable']:
                 cell['value']=0
                 cell['candidate']=""
+        self.start_time=time.time()
+        self.paused_time = 0
+        self.duration_heures=0
+        self.duration_minutes=0
+        self.duration_secondes=0 
    
     def solve_grid(self):
         # resoudre la grille initiale
